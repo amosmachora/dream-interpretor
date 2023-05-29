@@ -1,7 +1,10 @@
 import { faCircleNotch, faLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
-import { getChatGPTMessage } from "../openai/openai";
+import {
+  getChatGPTMessage,
+  getChatGPTMessageFromRapidAPI,
+} from "../openai/openai";
 
 const Demo = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,14 +16,23 @@ const Demo = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const inputValue = (e.currentTarget as HTMLFormElement)
+      .elements[0] as HTMLInputElement;
     try {
       setIsLoading(true);
-      const inputValue = (e.currentTarget as HTMLFormElement)
-        .elements[0] as HTMLInputElement;
       const dreamInterpretation = await getChatGPTMessage(inputValue.value);
       setDreamInterpretation(dreamInterpretation);
     } catch (error: any) {
-      setError(error.message);
+      console.error(error, "getChatGPTMessage");
+      try {
+        const dreamInterpretation = await getChatGPTMessageFromRapidAPI(
+          inputValue.value
+        );
+        setDreamInterpretation(dreamInterpretation);
+      } catch (error: any) {
+        console.error(error, "getChatGPTMessageFromRapidAPI");
+        setError(error.message);
+      }
     }
     setIsLoading(false);
   };
